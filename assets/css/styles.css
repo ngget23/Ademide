@@ -374,7 +374,8 @@ img {
   --scroll-tilt: 0deg;
   --reveal-base-transform: translate3d(var(--scroll-shift-x), var(--scroll-shift-y), 0) rotate(var(--scroll-tilt));
   transform: var(--reveal-base-transform) translate3d(var(--reveal-offset-x, 0), var(--reveal-offset-y, 0), 0);
-  transition: transform 560ms var(--reveal-ease);
+  transition: transform 560ms var(--reveal-ease),
+    opacity var(--reveal-duration, 0.95s) var(--reveal-ease);
   will-change: transform;
 }
 
@@ -707,6 +708,10 @@ img {
 }
 
 .orbit-node {
+  --reveal-base-transform: translate3d(0, 0, 0);
+}
+
+.orbit-node {
   position: absolute;
   width: min(250px, 40vw);
   padding: 22px;
@@ -949,7 +954,8 @@ img {
     position: relative;
     inset: auto;
     width: 100%;
-    transform: none;
+    --reveal-base-transform: translate3d(0, 0, 0);
+    transform: var(--reveal-base-transform) translate3d(var(--reveal-offset-x, 0), var(--reveal-offset-y, 0), 0);
   }
 
   .orbit-core {
@@ -1029,6 +1035,9 @@ img {
   .capsule-shell,
   .code-chip {
     transform: none;
+    --reveal-base-transform: translate3d(0, 0, 0);
+    --reveal-offset-x: 0px;
+    --reveal-offset-y: 0px;
     transition: none;
   }
 

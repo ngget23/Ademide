@@ -113,21 +113,23 @@ const renderHero = (hero) => `
           ${hero.sideCard.items.map((item) => `<li>${item}</li>`).join("")}
         </ul>
       </article>
-      <div ${withReveal({ classes: "hero-visual", direction: "right", delay: 360, duration: 1.12 })}>
-        <div class="halo halo--one"></div>
-        <div class="halo halo--two"></div>
-        <div class="halo halo--three"></div>
-        <div class="visual-noise"></div>
-        <div class="capsule-shell-float">
-          <div class="capsule-shell">
-            <div class="capsule-top"></div>
-            <div class="capsule-screens">
-              <div class="capsule-screen"></div>
-              <div class="capsule-screen capsule-screen--tall"></div>
+      <div ${withReveal({ classes: "hero-visual-wrap", direction: "right", delay: 360, duration: 1.12 })}>
+        <div class="hero-visual">
+          <div class="halo halo--one"></div>
+          <div class="halo halo--two"></div>
+          <div class="halo halo--three"></div>
+          <div class="visual-noise"></div>
+          <div class="capsule-shell-float">
+            <div class="capsule-shell">
+              <div class="capsule-top"></div>
+              <div class="capsule-screens">
+                <div class="capsule-screen"></div>
+                <div class="capsule-screen capsule-screen--tall"></div>
+              </div>
             </div>
           </div>
+          ${pillsMarkup(hero.visualLabels || data.defaultVisualLabels)}
         </div>
-        ${pillsMarkup(hero.visualLabels || data.defaultVisualLabels)}
       </div>
     </div>
   </section>
