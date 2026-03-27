@@ -5,9 +5,29 @@ const app = document.getElementById("app");
 const headerHost = document.querySelector('[data-shell="header"]');
 const footerHost = document.querySelector('[data-shell="footer"]');
 
-const buttonMarkup = (action, tone = "primary") => {
+const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+const staggerDelay = (index, base = 120, step = 90, cap = 780) => Math.min(base + index * step, cap);
+
+const revealClass = (direction = "up") => `reveal-${direction}`;
+
+const revealStyle = (delay = 0, baseTransform = "") => {
+  const styles = [];
+  if (delay) styles.push(`--reveal-delay: ${delay}ms`);
+  if (baseTransform) styles.push(`--reveal-base-transform: ${baseTransform}`);
+  return styles.length ? ` style="${styles.join("; ")};"` : "";
+};
+
+const revealAttr = (baseClass, direction = "up", delay = 0, baseTransform = "") =>
+  `class="${baseClass} ${revealClass(direction)}"${revealStyle(delay, baseTransform)}`;
+
+const buttonMarkup = (action, tone = "primary", motion = {}) => {
   if (!action) return "";
-  return `<a class="button button--${tone}" href="${action.href}">${action.label}</a>`;
+  const revealToken = motion.direction ? ` ${revealClass(motion.direction)}` : "";
+  const delayStyle = motion.delay ? ` style="--reveal-delay: ${motion.delay}ms;"` : "";
+  return `<a class="button button--${tone}${revealToken}" href="${action.href}"${delayStyle}>${action.label}</a>`;
 };
 
 const pillsMarkup = (items) =>
@@ -16,7 +36,7 @@ const pillsMarkup = (items) =>
     .join("");
 
 const renderHeader = () => `
-  <div class="header-inner">
+  <div ${revealAttr("header-inner", "up", 90)}>
     <a class="brand" href="index.html" aria-label="Ademide home">
       <span class="brand-mark">${data.brand.mark}</span>
       <span class="brand-copy">
@@ -40,22 +60,22 @@ const renderHeader = () => `
 
 const renderHero = (hero) => `
   <section class="hero">
-    <div class="hero-copy" data-reveal>
-      <div class="hero-topline">
+    <div class="hero-copy">
+      <div ${revealAttr("hero-topline", "left", 100)}>
         <span class="eyebrow">${hero.eyebrow}</span>
         <span class="handle">${hero.handle}</span>
       </div>
-      <h1>${hero.title}</h1>
-      <p>${hero.lead}</p>
+      <h1 class="${revealClass("left")}"${revealStyle(180)}>${hero.title}</h1>
+      <p class="${revealClass("left")}"${revealStyle(260)}>${hero.lead}</p>
       <div class="hero-actions">
-        ${buttonMarkup(hero.primaryAction, "primary")}
-        ${buttonMarkup(hero.secondaryAction, "secondary")}
+        ${buttonMarkup(hero.primaryAction, "primary", { direction: "up", delay: 340 })}
+        ${buttonMarkup(hero.secondaryAction, "secondary", { direction: "up", delay: 420 })}
       </div>
       <div class="hero-stats">
         ${hero.stats
           .map(
-            (stat) => `
-              <article class="stat-card glass-card">
+            (stat, index) => `
+              <article ${revealAttr("stat-card glass-card", "up", staggerDelay(index, 500, 90, 860))}>
                 <strong>${stat.value}</strong>
                 <span>${stat.label}</span>
               </article>
@@ -65,7 +85,7 @@ const renderHero = (hero) => `
       </div>
     </div>
     <div class="hero-visual-column">
-      <article class="hero-side-card glass-card" data-reveal>
+      <article ${revealAttr("hero-side-card glass-card", "right", 220)}>
         <span class="section-kicker">${hero.sideCard.eyebrow}</span>
         <h2>${hero.sideCard.title}</h2>
         <p>${hero.sideCard.copy}</p>
@@ -73,16 +93,18 @@ const renderHero = (hero) => `
           ${hero.sideCard.items.map((item) => `<li>${item}</li>`).join("")}
         </ul>
       </article>
-      <div class="hero-visual" data-reveal>
+      <div ${revealAttr("hero-visual", "right", 300)}>
         <div class="halo halo--one"></div>
         <div class="halo halo--two"></div>
         <div class="halo halo--three"></div>
         <div class="visual-noise"></div>
-        <div class="capsule-shell">
-          <div class="capsule-top"></div>
-          <div class="capsule-screens">
-            <div class="capsule-screen"></div>
-            <div class="capsule-screen capsule-screen--tall"></div>
+        <div class="capsule-drift">
+          <div class="capsule-shell">
+            <div class="capsule-top"></div>
+            <div class="capsule-screens">
+              <div class="capsule-screen"></div>
+              <div class="capsule-screen capsule-screen--tall"></div>
+            </div>
           </div>
         </div>
         ${pillsMarkup(hero.visualLabels || data.defaultVisualLabels)}
@@ -103,7 +125,7 @@ const renderMarquee = () => {
 };
 
 const renderSectionHeading = (section) => `
-  <div class="section-heading" data-reveal>
+  <div ${revealAttr("section-heading", "left", 90)}>
     <span class="section-kicker">${section.kicker}</span>
     ${section.title ? `<h2>${section.title}</h2>` : ""}
     ${section.copy ? `<p>${section.copy}</p>` : ""}
@@ -116,8 +138,8 @@ const renderGridSection = (section) => `
     <div class="card-grid card-grid--generic">
       ${section.items
         .map(
-          (item) => `
-            <article class="info-card glass-card" data-reveal>
+          (item, index) => `
+            <article ${revealAttr("info-card glass-card", "up", staggerDelay(index, 140, 80, 700))}>
               <span class="card-eyebrow">${item.eyebrow}</span>
               <h3>${item.title}</h3>
               <p>${item.text}</p>
@@ -136,8 +158,8 @@ const renderProjectsSection = (section) => `
     <div class="card-grid card-grid--projects">
       ${section.items
         .map(
-          (item) => `
-            <article class="project-card glass-card" data-reveal>
+          (item, index) => `
+            <article ${revealAttr("project-card glass-card", "up", staggerDelay(index, 160, 90, 720))}>
               <div class="project-topline">
                 <span class="project-index">Case</span>
                 <span class="project-outcome">${item.outcome}</span>
@@ -161,8 +183,8 @@ const renderMetricsSection = (section) => `
     <div class="metric-grid">
       ${section.items
         .map(
-          (item) => `
-            <article class="metric-card glass-card" data-reveal>
+          (item, index) => `
+            <article ${revealAttr("metric-card glass-card", "up", staggerDelay(index, 150, 80, 620))}>
               <strong>${item.value}</strong>
               <span>${item.label}</span>
             </article>
@@ -179,8 +201,8 @@ const renderTimelineSection = (section) => `
     <div class="timeline-grid">
       ${section.items
         .map(
-          (item) => `
-            <article class="timeline-card glass-card" data-reveal>
+          (item, index) => `
+            <article ${revealAttr("timeline-card glass-card", "up", staggerDelay(index, 150, 90, 710))}>
               <span class="timeline-phase">${item.phase}</span>
               <h3>${item.title}</h3>
               <p>${item.text}</p>
@@ -192,29 +214,44 @@ const renderTimelineSection = (section) => `
   </section>
 `;
 
-const renderOrbitSection = (section) => `
-  <section class="content-section orbit-shell">
-    ${renderSectionHeading(section)}
-    <div class="orbit-stage" data-reveal>
-      <div class="orbit-path orbit-path--one"></div>
-      <div class="orbit-path orbit-path--two"></div>
-      <div class="orbit-path orbit-path--three"></div>
-      <article class="orbit-node orbit-node--1 glass-card"><h3>${section.items[0].title}</h3><p>${section.items[0].text}</p></article>
-      <article class="orbit-node orbit-node--2 glass-card"><h3>${section.items[1].title}</h3><p>${section.items[1].text}</p></article>
-      <article class="orbit-node orbit-node--3 glass-card"><h3>${section.items[2].title}</h3><p>${section.items[2].text}</p></article>
-      <article class="orbit-node orbit-node--4 glass-card"><h3>${section.items[3].title}</h3><p>${section.items[3].text}</p></article>
-      <div class="orbit-core glass-card">
-        <span class="card-eyebrow">${section.center.eyebrow}</span>
-        <h3>${section.center.title}</h3>
-        <p>${section.center.text}</p>
+const renderOrbitSection = (section) => {
+  const nodes = section.items
+    .slice(0, 4)
+    .map(
+      (item, index) => `
+        <article ${revealAttr(
+          `orbit-node orbit-node--${index + 1} glass-card`,
+          index % 2 === 0 ? "left" : "right",
+          staggerDelay(index, 140, 90, 500)
+        )}>
+          <h3>${item.title}</h3>
+          <p>${item.text}</p>
+        </article>
+      `
+    )
+    .join("");
+
+  return `
+    <section class="content-section orbit-shell">
+      ${renderSectionHeading(section)}
+      <div class="orbit-stage">
+        <div class="orbit-path orbit-path--one"></div>
+        <div class="orbit-path orbit-path--two"></div>
+        <div class="orbit-path orbit-path--three"></div>
+        ${nodes}
+        <div ${revealAttr("orbit-core glass-card", "up", 290)}>
+          <span class="card-eyebrow">${section.center.eyebrow}</span>
+          <h3>${section.center.title}</h3>
+          <p>${section.center.text}</p>
+        </div>
       </div>
-    </div>
-  </section>
-`;
+    </section>
+  `;
+};
 
 const renderQuoteSection = (section) => `
   <section class="content-section quote-shell">
-    <article class="quote-card glass-card" data-reveal>
+    <article ${revealAttr("quote-card glass-card", "up", 130)}>
       <span class="section-kicker">${section.kicker}</span>
       <blockquote>${section.quote}</blockquote>
       <div class="quote-meta">
@@ -227,13 +264,13 @@ const renderQuoteSection = (section) => `
 
 const renderCtaSection = (section) => `
   <section class="content-section cta-shell">
-    <article class="cta-card glass-card" data-reveal>
+    <article ${revealAttr("cta-card glass-card", "up", 140)}>
       <span class="section-kicker">${section.kicker}</span>
       <h2>${section.title}</h2>
       <p>${section.copy}</p>
       <div class="hero-actions">
-        ${buttonMarkup(section.primaryAction, "primary")}
-        ${buttonMarkup(section.secondaryAction, "secondary")}
+        ${buttonMarkup(section.primaryAction, "primary", { direction: "up", delay: 240 })}
+        ${buttonMarkup(section.secondaryAction, "secondary", { direction: "up", delay: 320 })}
       </div>
     </article>
   </section>
@@ -262,57 +299,103 @@ const renderSection = (section) => {
 
 const renderFooter = () => `
   <div class="footer-inner glass-card">
-    <div>
+    <div ${revealAttr("footer-lead", "up", 90)}>
       <span class="section-kicker">${data.brand.role}</span>
       <h2>${data.brand.name}</h2>
       <p>${data.brand.blurb}</p>
     </div>
-    <div class="footer-links">
+    <div ${revealAttr("footer-links", "up", 170)}>
       ${data.navigation.map((item) => `<a href="${item.href}">${item.label}</a>`).join("")}
     </div>
-    <div class="footer-meta">
+    <div ${revealAttr("footer-meta", "up", 250)}>
       <span>Built locally</span>
       <span id="footer-year"></span>
     </div>
   </div>
 `;
 
-const revealOnScroll = () => {
+const initScrollReveals = () => {
+  const revealTargets = document.querySelectorAll(".reveal-left, .reveal-right, .reveal-up");
+  if (!revealTargets.length) return;
+
+  if (prefersReducedMotion() || !("IntersectionObserver" in window)) {
+    revealTargets.forEach((element) => element.classList.add("is-visible"));
+    return;
+  }
+
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting) entry.target.classList.add("is-visible");
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
       });
     },
-    { threshold: 0.18 }
+    {
+      threshold: 0.12,
+      rootMargin: "0px 0px -10% 0px",
+    }
   );
-  document.querySelectorAll("[data-reveal]").forEach((element) => observer.observe(element));
-  window.setTimeout(() => {
-    document
-      .querySelectorAll("[data-reveal]:not(.is-visible)")
-      .forEach((element) => element.classList.add("is-visible"));
-  }, 1100);
+
+  revealTargets.forEach((element) => observer.observe(element));
+};
+
+const initHeroParallax = () => {
+  const visual = document.querySelector(".hero-visual");
+  if (!visual || prefersReducedMotion()) return;
+
+  let rafId = 0;
+
+  const update = () => {
+    rafId = 0;
+    const rect = visual.getBoundingClientRect();
+    const viewport = window.innerHeight || 1;
+    const offsetFromCenter = rect.top + rect.height * 0.5 - viewport * 0.5;
+    const progress = clamp(offsetFromCenter / viewport, -1, 1);
+    const scrollShiftY = (-progress * 16).toFixed(2);
+    const chipShiftY = (progress * 8).toFixed(2);
+    const scrollTilt = (-progress * 2.2).toFixed(2);
+
+    visual.style.setProperty("--scroll-shift-y", `${scrollShiftY}px`);
+    visual.style.setProperty("--scroll-chip-shift", `${chipShiftY}px`);
+    visual.style.setProperty("--scroll-tilt", `${scrollTilt}deg`);
+  };
+
+  const requestUpdate = () => {
+    if (rafId) return;
+    rafId = window.requestAnimationFrame(update);
+  };
+
+  requestUpdate();
+  window.addEventListener("scroll", requestUpdate, { passive: true });
+  window.addEventListener("resize", requestUpdate);
 };
 
 const initPointerMotion = () => {
   const visual = document.querySelector(".hero-visual");
-  if (!visual) return;
+  if (!visual || prefersReducedMotion()) return;
+
   visual.addEventListener("pointermove", (event) => {
     const rect = visual.getBoundingClientRect();
-    const offsetX = ((event.clientX - rect.left) / rect.width - 0.5) * 24;
-    const offsetY = ((event.clientY - rect.top) / rect.height - 0.5) * 20;
-    visual.style.setProperty("--move-x", `${offsetX}px`);
-    visual.style.setProperty("--move-y", `${offsetY}px`);
+    const offsetX = ((event.clientX - rect.left) / rect.width - 0.5) * 14;
+    const offsetY = ((event.clientY - rect.top) / rect.height - 0.5) * 12;
+    visual.style.setProperty("--move-x", `${offsetX.toFixed(2)}px`);
+    visual.style.setProperty("--move-y", `${offsetY.toFixed(2)}px`);
   });
+
   visual.addEventListener("pointerleave", () => {
     visual.style.setProperty("--move-x", "0px");
     visual.style.setProperty("--move-y", "0px");
   });
 };
 
-headerHost.innerHTML = renderHeader();
-app.innerHTML = `${renderHero(page.hero)}${renderMarquee()}${page.sections.map(renderSection).join("")}`;
-footerHost.innerHTML = renderFooter();
-document.getElementById("footer-year").textContent = new Date().getFullYear();
-revealOnScroll();
+if (headerHost) headerHost.innerHTML = renderHeader();
+if (app) app.innerHTML = `${renderHero(page.hero)}${renderMarquee()}${page.sections.map(renderSection).join("")}`;
+if (footerHost) footerHost.innerHTML = renderFooter();
+
+const footerYear = document.getElementById("footer-year");
+if (footerYear) footerYear.textContent = new Date().getFullYear();
+
+initScrollReveals();
+initHeroParallax();
 initPointerMotion();
