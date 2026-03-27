@@ -1086,6 +1086,12 @@ img {
     transition: none !important;
   }
 
+  .orbit-core.reveal-left,
+  .orbit-core.reveal-right,
+  .orbit-core.reveal-up {
+    transform: translate3d(-50%, -50%, 0) !important;
+  }
+
   .hero-parallax-layer {
     transform: translate3d(0, 0, 0) !important;
     transition: none !important;
