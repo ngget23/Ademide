@@ -1019,6 +1019,13 @@ img {
     --reveal-base-transform: translate3d(0, 0, 0);
   }
 
+  .orbit-core.reveal-up,
+  .orbit-node.reveal-left,
+  .orbit-node.reveal-right,
+  .orbit-node.reveal-up {
+    --reveal-base-transform: translate3d(0, 0, 0);
+  }
+
   .orbit-core {
     aspect-ratio: auto;
     border-radius: 24px;
