@@ -833,39 +833,35 @@ img {
 .reveal-left,
 .reveal-right,
 .reveal-up {
+  --reveal-shift-x: 0px;
+  --reveal-shift-y: 0px;
   opacity: 0;
+  transform: translate3d(var(--reveal-shift-x), var(--reveal-shift-y), 0);
+  transition-property: transform, opacity;
+  transition-duration: var(--reveal-duration, 0.95s);
+  transition-timing-function: var(--reveal-ease);
+  transition-delay: var(--reveal-delay, 0ms);
   will-change: transform, opacity;
 }
 
 .reveal-left {
-  transform: translate3d(-60px, 0, 0);
+  --reveal-shift-x: -60px;
 }
 
 .reveal-right {
-  transform: translate3d(60px, 0, 0);
+  --reveal-shift-x: 60px;
 }
 
 .reveal-up {
-  transform: translate3d(0, 60px, 0);
+  --reveal-shift-y: 60px;
 }
 
 .reveal-left.is-visible,
 .reveal-right.is-visible,
 .reveal-up.is-visible {
   opacity: 1;
-  transform: translate3d(0, 0, 0);
-}
-
-.reveal-left.is-visible {
-  animation: reveal-left-in var(--reveal-duration, 0.95s) var(--reveal-ease) var(--reveal-delay, 0ms) backwards;
-}
-
-.reveal-right.is-visible {
-  animation: reveal-right-in var(--reveal-duration, 0.95s) var(--reveal-ease) var(--reveal-delay, 0ms) backwards;
-}
-
-.reveal-up.is-visible {
-  animation: reveal-up-in var(--reveal-duration, 0.95s) var(--reveal-ease) var(--reveal-delay, 0ms) backwards;
+  --reveal-shift-x: 0px;
+  --reveal-shift-y: 0px;
 }
 
 @keyframes spin {
@@ -874,39 +870,6 @@ img {
   }
   to {
     transform: translate(-50%, -50%) rotate(360deg);
-  }
-}
-
-@keyframes reveal-left-in {
-  from {
-    opacity: 0;
-    transform: translate3d(-60px, 0, 0);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-@keyframes reveal-right-in {
-  from {
-    opacity: 0;
-    transform: translate3d(60px, 0, 0);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-@keyframes reveal-up-in {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 60px, 0);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
   }
 }
 
