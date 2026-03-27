@@ -4,10 +4,27 @@ const page = data.pages[pageId] || data.pages.index;
 const app = document.getElementById("app");
 const headerHost = document.querySelector('[data-shell="header"]');
 const footerHost = document.querySelector('[data-shell="footer"]');
+const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
 
-const buttonMarkup = (action, tone = "primary") => {
+const prefersReducedMotion = () => motionPreference.matches;
+const revealClass = (direction = "up") => `reveal-${direction}`;
+const withRevealClass = (baseClasses, direction = "up") => `${baseClasses} ${revealClass(direction)}`;
+const staggerDelay = (index, step = 90, start = 0) => start + index * step;
+
+const motionStyle = (delay = 0, duration = "") => {
+  const declarations = [];
+  if (delay > 0) declarations.push(`--reveal-delay: ${delay}ms`);
+  if (duration) declarations.push(`--reveal-duration: ${duration}`);
+  return declarations.length ? ` style="${declarations.join("; ")};"` : "";
+};
+
+const buttonMarkup = (action, tone = "primary", motion = null) => {
   if (!action) return "";
-  return `<a class="button button--${tone}" href="${action.href}">${action.label}</a>`;
+  const motionClass = motion ? ` ${revealClass(motion.direction || "up")}` : "";
+  const motionAttrs = motion
+    ? ` data-reveal${motionStyle(motion.delay || 0, motion.duration || "")}`
+    : "";
+  return `<a class="button button--${tone}${motionClass}" href="${action.href}"${motionAttrs}>${action.label}</a>`;
 };
 
 const pillsMarkup = (items) =>
@@ -16,7 +33,7 @@ const pillsMarkup = (items) =>
     .join("");
 
 const renderHeader = () => `
-  <div class="header-inner">
+  <div class="${withRevealClass("header-inner", "up")}" data-reveal${motionStyle(70, "0.86s")}>
     <a class="brand" href="index.html" aria-label="Ademide home">
       <span class="brand-mark">${data.brand.mark}</span>
       <span class="brand-copy">
@@ -40,22 +57,24 @@ const renderHeader = () => `
 
 const renderHero = (hero) => `
   <section class="hero">
-    <div class="hero-copy" data-reveal>
-      <div class="hero-topline">
+    <div class="hero-copy">
+      <div class="${withRevealClass("hero-topline", "left")}" data-reveal${motionStyle(90)}>
         <span class="eyebrow">${hero.eyebrow}</span>
         <span class="handle">${hero.handle}</span>
       </div>
-      <h1>${hero.title}</h1>
-      <p>${hero.lead}</p>
+      <h1 class="${revealClass("left")}" data-reveal${motionStyle(170, "1.08s")}>${hero.title}</h1>
+      <p class="${revealClass("left")}" data-reveal${motionStyle(240)}>${hero.lead}</p>
       <div class="hero-actions">
-        ${buttonMarkup(hero.primaryAction, "primary")}
-        ${buttonMarkup(hero.secondaryAction, "secondary")}
+        ${buttonMarkup(hero.primaryAction, "primary", { direction: "up", delay: 310 })}
+        ${buttonMarkup(hero.secondaryAction, "secondary", { direction: "up", delay: 390 })}
       </div>
       <div class="hero-stats">
         ${hero.stats
           .map(
-            (stat) => `
-              <article class="stat-card glass-card">
+            (stat, index) => `
+              <article class="${withRevealClass("stat-card glass-card", "up")}" data-reveal${motionStyle(
+                staggerDelay(index, 95, 460)
+              )}>
                 <strong>${stat.value}</strong>
                 <span>${stat.label}</span>
               </article>
@@ -65,7 +84,7 @@ const renderHero = (hero) => `
       </div>
     </div>
     <div class="hero-visual-column">
-      <article class="hero-side-card glass-card" data-reveal>
+      <article class="${withRevealClass("hero-side-card glass-card", "right")}" data-reveal${motionStyle(220)}>
         <span class="section-kicker">${hero.sideCard.eyebrow}</span>
         <h2>${hero.sideCard.title}</h2>
         <p>${hero.sideCard.copy}</p>
@@ -73,19 +92,27 @@ const renderHero = (hero) => `
           ${hero.sideCard.items.map((item) => `<li>${item}</li>`).join("")}
         </ul>
       </article>
-      <div class="hero-visual" data-reveal>
-        <div class="halo halo--one"></div>
-        <div class="halo halo--two"></div>
-        <div class="halo halo--three"></div>
-        <div class="visual-noise"></div>
-        <div class="capsule-shell">
-          <div class="capsule-top"></div>
-          <div class="capsule-screens">
-            <div class="capsule-screen"></div>
-            <div class="capsule-screen capsule-screen--tall"></div>
+      <div class="${withRevealClass("hero-visual", "right")}" data-reveal${motionStyle(300, "1.1s")}>
+        <div class="hero-parallax-layer" data-parallax-depth="0.35">
+          <div class="halo halo--one"></div>
+          <div class="halo halo--two"></div>
+          <div class="halo halo--three"></div>
+          <div class="visual-noise"></div>
+        </div>
+        <div class="hero-parallax-layer" data-parallax-depth="0.72">
+          <div class="capsule-float">
+            <div class="capsule-shell">
+              <div class="capsule-top"></div>
+              <div class="capsule-screens">
+                <div class="capsule-screen"></div>
+                <div class="capsule-screen capsule-screen--tall"></div>
+              </div>
+            </div>
           </div>
         </div>
-        ${pillsMarkup(hero.visualLabels || data.defaultVisualLabels)}
+        <div class="hero-parallax-layer" data-parallax-depth="1">
+          ${pillsMarkup(hero.visualLabels || data.defaultVisualLabels)}
+        </div>
       </div>
     </div>
   </section>
@@ -102,8 +129,8 @@ const renderMarquee = () => {
   `;
 };
 
-const renderSectionHeading = (section) => `
-  <div class="section-heading" data-reveal>
+const renderSectionHeading = (section, delay = 80) => `
+  <div class="${withRevealClass("section-heading", "left")}" data-reveal${motionStyle(delay, "1s")}>
     <span class="section-kicker">${section.kicker}</span>
     ${section.title ? `<h2>${section.title}</h2>` : ""}
     ${section.copy ? `<p>${section.copy}</p>` : ""}
@@ -112,12 +139,14 @@ const renderSectionHeading = (section) => `
 
 const renderGridSection = (section) => `
   <section class="content-section section-grid-shell">
-    ${renderSectionHeading(section)}
+    ${renderSectionHeading(section, 70)}
     <div class="card-grid card-grid--generic">
       ${section.items
         .map(
-          (item) => `
-            <article class="info-card glass-card" data-reveal>
+          (item, index) => `
+            <article class="${withRevealClass("info-card glass-card", "up")}" data-reveal${motionStyle(
+              staggerDelay(index, 90, 140)
+            )}>
               <span class="card-eyebrow">${item.eyebrow}</span>
               <h3>${item.title}</h3>
               <p>${item.text}</p>
@@ -132,12 +161,14 @@ const renderGridSection = (section) => `
 
 const renderProjectsSection = (section) => `
   <section class="content-section section-projects-shell">
-    ${renderSectionHeading(section)}
+    ${renderSectionHeading(section, 70)}
     <div class="card-grid card-grid--projects">
       ${section.items
         .map(
-          (item) => `
-            <article class="project-card glass-card" data-reveal>
+          (item, index) => `
+            <article class="${withRevealClass("project-card glass-card", "up")}" data-reveal${motionStyle(
+              staggerDelay(index, 95, 150)
+            )}>
               <div class="project-topline">
                 <span class="project-index">Case</span>
                 <span class="project-outcome">${item.outcome}</span>
@@ -157,12 +188,14 @@ const renderProjectsSection = (section) => `
 
 const renderMetricsSection = (section) => `
   <section class="content-section metrics-shell">
-    ${renderSectionHeading(section)}
+    ${renderSectionHeading(section, 70)}
     <div class="metric-grid">
       ${section.items
         .map(
-          (item) => `
-            <article class="metric-card glass-card" data-reveal>
+          (item, index) => `
+            <article class="${withRevealClass("metric-card glass-card", "up")}" data-reveal${motionStyle(
+              staggerDelay(index, 85, 130)
+            )}>
               <strong>${item.value}</strong>
               <span>${item.label}</span>
             </article>
@@ -175,12 +208,14 @@ const renderMetricsSection = (section) => `
 
 const renderTimelineSection = (section) => `
   <section class="content-section timeline-shell">
-    ${renderSectionHeading(section)}
+    ${renderSectionHeading(section, 70)}
     <div class="timeline-grid">
       ${section.items
         .map(
-          (item) => `
-            <article class="timeline-card glass-card" data-reveal>
+          (item, index) => `
+            <article class="${withRevealClass("timeline-card glass-card", "up")}" data-reveal${motionStyle(
+              staggerDelay(index, 95, 150)
+            )}>
               <span class="timeline-phase">${item.phase}</span>
               <h3>${item.title}</h3>
               <p>${item.text}</p>
@@ -194,16 +229,25 @@ const renderTimelineSection = (section) => `
 
 const renderOrbitSection = (section) => `
   <section class="content-section orbit-shell">
-    ${renderSectionHeading(section)}
-    <div class="orbit-stage" data-reveal>
+    ${renderSectionHeading(section, 70)}
+    <div class="orbit-stage">
       <div class="orbit-path orbit-path--one"></div>
       <div class="orbit-path orbit-path--two"></div>
       <div class="orbit-path orbit-path--three"></div>
-      <article class="orbit-node orbit-node--1 glass-card"><h3>${section.items[0].title}</h3><p>${section.items[0].text}</p></article>
-      <article class="orbit-node orbit-node--2 glass-card"><h3>${section.items[1].title}</h3><p>${section.items[1].text}</p></article>
-      <article class="orbit-node orbit-node--3 glass-card"><h3>${section.items[2].title}</h3><p>${section.items[2].text}</p></article>
-      <article class="orbit-node orbit-node--4 glass-card"><h3>${section.items[3].title}</h3><p>${section.items[3].text}</p></article>
-      <div class="orbit-core glass-card">
+      ${section.items
+        .map(
+          (item, index) => `
+            <article class="${withRevealClass(
+              `orbit-node orbit-node--${index + 1} glass-card`,
+              index % 2 === 0 ? "left" : "right"
+            )}" data-reveal${motionStyle(staggerDelay(index, 90, 150))}>
+              <h3>${item.title}</h3>
+              <p>${item.text}</p>
+            </article>
+          `
+        )
+        .join("")}
+      <div class="${withRevealClass("orbit-core glass-card", "up")}" data-reveal${motionStyle(290)}>
         <span class="card-eyebrow">${section.center.eyebrow}</span>
         <h3>${section.center.title}</h3>
         <p>${section.center.text}</p>
@@ -214,7 +258,7 @@ const renderOrbitSection = (section) => `
 
 const renderQuoteSection = (section) => `
   <section class="content-section quote-shell">
-    <article class="quote-card glass-card" data-reveal>
+    <article class="${withRevealClass("quote-card glass-card", "up")}" data-reveal${motionStyle(90, "1.04s")}>
       <span class="section-kicker">${section.kicker}</span>
       <blockquote>${section.quote}</blockquote>
       <div class="quote-meta">
@@ -227,13 +271,13 @@ const renderQuoteSection = (section) => `
 
 const renderCtaSection = (section) => `
   <section class="content-section cta-shell">
-    <article class="cta-card glass-card" data-reveal>
+    <article class="${withRevealClass("cta-card glass-card", "up")}" data-reveal${motionStyle(90, "1.06s")}>
       <span class="section-kicker">${section.kicker}</span>
       <h2>${section.title}</h2>
       <p>${section.copy}</p>
       <div class="hero-actions">
-        ${buttonMarkup(section.primaryAction, "primary")}
-        ${buttonMarkup(section.secondaryAction, "secondary")}
+        ${buttonMarkup(section.primaryAction, "primary", { direction: "up", delay: 160 })}
+        ${buttonMarkup(section.secondaryAction, "secondary", { direction: "up", delay: 240 })}
       </div>
     </article>
   </section>
@@ -262,15 +306,22 @@ const renderSection = (section) => {
 
 const renderFooter = () => `
   <div class="footer-inner glass-card">
-    <div>
+    <div class="${revealClass("left")}" data-reveal${motionStyle(80)}>
       <span class="section-kicker">${data.brand.role}</span>
       <h2>${data.brand.name}</h2>
       <p>${data.brand.blurb}</p>
     </div>
     <div class="footer-links">
-      ${data.navigation.map((item) => `<a href="${item.href}">${item.label}</a>`).join("")}
+      ${data.navigation
+        .map(
+          (item, index) =>
+            `<a class="${revealClass("up")}" href="${item.href}" data-reveal${motionStyle(
+              staggerDelay(index, 55, 150)
+            )}>${item.label}</a>`
+        )
+        .join("")}
     </div>
-    <div class="footer-meta">
+    <div class="${withRevealClass("footer-meta", "right")}" data-reveal${motionStyle(280)}>
       <span>Built locally</span>
       <span id="footer-year"></span>
     </div>
@@ -278,36 +329,109 @@ const renderFooter = () => `
 `;
 
 const revealOnScroll = () => {
+  const revealTargets = document.querySelectorAll("[data-reveal]");
+  if (!revealTargets.length) return;
+
+  if (prefersReducedMotion()) {
+    revealTargets.forEach((element) => element.classList.add("is-visible"));
+    return;
+  }
+
   const observer = new IntersectionObserver(
-    (entries) => {
+    (entries, revealObserver) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting) entry.target.classList.add("is-visible");
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-visible");
+        revealObserver.unobserve(entry.target);
       });
     },
-    { threshold: 0.18 }
+    { threshold: 0.14, rootMargin: "0px 0px -12% 0px" }
   );
-  document.querySelectorAll("[data-reveal]").forEach((element) => observer.observe(element));
-  window.setTimeout(() => {
-    document
-      .querySelectorAll("[data-reveal]:not(.is-visible)")
-      .forEach((element) => element.classList.add("is-visible"));
-  }, 1100);
+
+  revealTargets.forEach((element) => observer.observe(element));
+};
+
+const initHeroParallax = () => {
+  const hero = document.querySelector(".hero");
+  const visual = document.querySelector(".hero-visual");
+  if (!hero || !visual || prefersReducedMotion()) return;
+
+  const layers = Array.from(visual.querySelectorAll(".hero-parallax-layer"));
+  if (!layers.length) return;
+
+  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+  let rafId = 0;
+
+  const update = () => {
+    rafId = 0;
+    const heroBounds = hero.getBoundingClientRect();
+    const viewportHeight = window.innerHeight || 1;
+    const progress = clamp((viewportHeight * 0.62 - heroBounds.top) / (viewportHeight * 1.24), -1, 1);
+
+    layers.forEach((layer) => {
+      const depth = Number(layer.dataset.parallaxDepth || "0.5");
+      const shiftY = progress * 16 * depth;
+      const shiftX = progress * -6 * depth;
+      layer.style.setProperty("--scroll-shift-y", `${shiftY.toFixed(2)}px`);
+      layer.style.setProperty("--scroll-shift-x", `${shiftX.toFixed(2)}px`);
+    });
+  };
+
+  const queueUpdate = () => {
+    if (rafId) return;
+    rafId = window.requestAnimationFrame(update);
+  };
+
+  window.addEventListener("scroll", queueUpdate, { passive: true });
+  window.addEventListener("resize", queueUpdate);
+  queueUpdate();
 };
 
 const initPointerMotion = () => {
   const visual = document.querySelector(".hero-visual");
-  if (!visual) return;
+  if (!visual || prefersReducedMotion()) return;
+
+  let targetX = 0;
+  let targetY = 0;
+  let currentX = 0;
+  let currentY = 0;
+  let rafId = 0;
+
+  const render = () => {
+    currentX += (targetX - currentX) * 0.14;
+    currentY += (targetY - currentY) * 0.14;
+    visual.style.setProperty("--move-x", `${currentX.toFixed(2)}px`);
+    visual.style.setProperty("--move-y", `${currentY.toFixed(2)}px`);
+
+    if (Math.abs(targetX - currentX) > 0.08 || Math.abs(targetY - currentY) > 0.08) {
+      rafId = window.requestAnimationFrame(render);
+      return;
+    }
+
+    rafId = 0;
+  };
+
+  const queueRender = () => {
+    if (!rafId) rafId = window.requestAnimationFrame(render);
+  };
+
   visual.addEventListener("pointermove", (event) => {
     const rect = visual.getBoundingClientRect();
-    const offsetX = ((event.clientX - rect.left) / rect.width - 0.5) * 24;
-    const offsetY = ((event.clientY - rect.top) / rect.height - 0.5) * 20;
-    visual.style.setProperty("--move-x", `${offsetX}px`);
-    visual.style.setProperty("--move-y", `${offsetY}px`);
+    const normalizedX = (event.clientX - rect.left) / rect.width - 0.5;
+    const normalizedY = (event.clientY - rect.top) / rect.height - 0.5;
+    targetX = normalizedX * 14;
+    targetY = normalizedY * 12;
+    queueRender();
   });
-  visual.addEventListener("pointerleave", () => {
-    visual.style.setProperty("--move-x", "0px");
-    visual.style.setProperty("--move-y", "0px");
-  });
+
+  const resetPointerMotion = () => {
+    targetX = 0;
+    targetY = 0;
+    queueRender();
+  };
+
+  visual.addEventListener("pointerleave", resetPointerMotion);
+  visual.addEventListener("pointercancel", resetPointerMotion);
 };
 
 headerHost.innerHTML = renderHeader();
@@ -315,4 +439,5 @@ app.innerHTML = `${renderHero(page.hero)}${renderMarquee()}${page.sections.map(r
 footerHost.innerHTML = renderFooter();
 document.getElementById("footer-year").textContent = new Date().getFullYear();
 revealOnScroll();
+initHeroParallax();
 initPointerMotion();
