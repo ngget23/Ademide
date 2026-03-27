@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ademide | Premium Light Motion Remake</title>
+  <meta name="description" content="Standalone remake with premium scroll motion, light palette, and subtle parallax.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #eef4ff;
+      --bg-soft: #dfeafc;
+      --surface: rgba(255, 255, 255, 0.76);
+      --surface-strong: rgba(246, 251, 255, 0.9);
+      --border: rgba(78, 124, 201, 0.2);
+      --border-strong: rgba(63, 112, 196, 0.34);
+      --text: #0f1f37;
+      --muted: #566a87;
+      --accent: #3f83f8;
+      --accent-soft: #8ce0ff;
+      --shadow: 0 24px 72px rgba(45, 76, 133, 0.16);
+      --reveal-duration: 0.95s;
+      --reveal-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Space Grotesk", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.55;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .site-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background:
+        radial-gradient(circle at 20% 16%, rgba(95, 168, 255, 0.26), transparent 28%),
+        radial-gradient(circle at 78% 10%, rgba(79, 134, 255, 0.2), transparent 24%),
+        radial-gradient(circle at 50% 42%, rgba(178, 206, 247, 0.68), transparent 54%),
+        linear-gradient(180deg, #f6faff 0%, #edf5ff 38%, #e3eeff 100%);
+    }
+
+    .site-bg::before,
+    .site-bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+    }
+
+    .site-bg::before {
+      background-image: linear-gradient(rgba(101, 146, 225, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(101, 146, 225, 0.08) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: radial-gradient(circle at center, black 30%, transparent 90%);
+    }
+
+    .site-bg::after {
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.5), transparent 70%);
+      opacity: 0.55;
+    }
+
+    .site-shell {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 20px clamp(20px, 4vw, 52px) 72px;
+    }
+
+    .glass-card {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(240, 248, 255, 0.9));
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .site-header {
+      position: sticky;
+      top: 18px;
+      z-index: 40;
+      margin-bottom: 20px;
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 16px;
+      border-radius: 22px;
+      background: rgba(253, 253, 255, 0.86);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(24px);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      min-width: max-content;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 50px;
+      height: 50px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, rgba(115, 177, 255, 0.52), rgba(152, 201, 255, 0.6));
+      border: 1px solid rgba(107, 160, 232, 0.36);
+      color: var(--text);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .brand-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-copy strong {
+      font-size: 0.98rem;
+    }
+
+    .brand-copy small {
+      color: var(--muted);
+      font-size: 0.76rem;
+    }
+
+    .site-nav {
+      display: flex;
+      gap: 8px;
+      flex: 1;
+      justify-content: center;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .site-nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    .nav-link {
+      padding: 10px 14px;
+      border-radius: 999px;
+      color: var(--muted);
+      border: 1px solid transparent;
+      white-space: nowrap;
+      font-size: 0.92rem;
+      transition:
+        color 420ms var(--reveal-ease),
+        border-color 420ms var(--reveal-ease),
+        background 420ms var(--reveal-ease),
+        transform 420ms var(--reveal-ease);
+    }
+
+    .nav-link:hover,
+    .nav-link.is-active {
+      color: var(--text);
+      background: rgba(98, 168, 255, 0.14);
+      border-color: var(--border-strong);
+      transform: translate3d(0, -1px, 0);
+    }
+
+    .mini-cta,
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 48px;
+      padding: 0 20px;
+      border-radius: 999px;
+      font-weight: 700;
+      transition:
+        transform 480ms var(--reveal-ease),
+        box-shadow 480ms var(--reveal-ease),
+        background 480ms var(--reveal-ease),
+        border-color 480ms var(--reveal-ease);
+    }
+
+    .mini-cta,
+    .button--primary {
+      color: #04111f;
+      background: linear-gradient(135deg, var(--accent-soft), var(--accent));
+      box-shadow: 0 14px 34px rgba(89, 144, 231, 0.28);
+    }
+
+    .button--secondary {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid var(--border-strong);
+    }
+
+    .mini-cta:hover,
+    .button:hover {
+      transform: translate3d(0, -2px, 0);
+      box-shadow: 0 18px 34px rgba(84, 142, 232, 0.32);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.12fr) minmax(340px, 0.88fr);
+      gap: 34px;
+      align-items: center;
+      padding: clamp(32px, 5vw, 72px) 0 12px;
+      min-height: calc(100vh - 146px);
+    }
+
+    .hero-topline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .eyebrow,
+    .handle,
+    .section-kicker,
+    .card-eyebrow,
+    .project-index {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(97, 153, 231, 0.26);
+      background: rgba(255, 255, 255, 0.72);
+      color: #2b4f7a;
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .handle {
+      color: var(--muted);
+    }
+
+    .hero h1,
+    .section-heading h2,
+    .cta-card h2,
+    .footer-inner h2 {
+      margin: 0;
+      font-family: "Syne", sans-serif;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+    }
+
+    .hero h1 {
+      margin-top: 16px;
+      font-size: clamp(3rem, 7vw, 6.1rem);
+      line-height: 0.95;
+      max-width: 11ch;
+    }
+
+    .hero p,
+    .section-heading p,
+    .info-card p,
+    .project-card p,
+    .quote-meta span,
+    .cta-card p,
+    .footer-inner p {
+      color: var(--muted);
+    }
+
+    .hero-copy > p {
+      max-width: 42rem;
+      margin: 16px 0 0;
+      font-size: clamp(1.02rem, 1.5vw, 1.18rem);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 36px;
+    }
+
+    .stat-card,
+    .metric-card {
+      padding: 18px;
+      border-radius: 22px;
+    }
+
+    .stat-card strong,
+    .metric-card strong {
+      display: block;
+      font-size: 1.45rem;
+      margin-bottom: 6px;
+    }
+
+    .stat-card span,
+    .metric-card span {
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .hero-visual-column {
+      display: grid;
+      gap: 20px;
+    }
+
+    .hero-side-card {
+      padding: 24px;
+      border-radius: 26px;
+    }
+
+    .hero-side-card h2,
+    .info-card h3,
+    .project-card h3 {
+      margin: 14px 0 10px;
+      font-size: 1.28rem;
+    }
+
+    .hero-side-card p,
+    .quote-card blockquote,
+    .quote-card strong {
+      margin: 0;
+    }
+
+    .bullet-list {
+      margin: 18px 0 0;
+      padding-left: 18px;
+      color: var(--text);
+    }
+
+    .bullet-list li + li {
+      margin-top: 10px;
+    }
+
+    .hero-visual {
+      --move-x: 0px;
+      --move-y: 0px;
+      --scroll-shell-x: 0px;
+      --scroll-shell-y: 0px;
+      --scroll-halo-x: 0px;
+      --scroll-halo-y: 0px;
+      --scroll-noise-x: 0px;
+      --scroll-noise-y: 0px;
+      position: relative;
+      min-height: 560px;
+      border-radius: 34px;
+      overflow: hidden;
+      background: radial-gradient(circle at center, rgba(225, 239, 255, 0.98) 0%, rgba(204, 226, 250, 0.96) 54%, rgba(188, 216, 247, 0.96) 100%);
+      border: 1px solid rgba(124, 173, 233, 0.32);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.64), var(--shadow);
+    }
+
+    .visual-noise {
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(73, 125, 190, 0.22) 1px, transparent 1px);
+      background-size: 30px 30px;
+      opacity: 0.09;
+      transform: translate3d(var(--scroll-noise-x), var(--scroll-noise-y), 0);
+      transition: transform 720ms var(--reveal-ease);
+    }
+
+    .halo {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      border-radius: 50%;
+      --halo-x: var(--scroll-halo-x);
+      --halo-y: var(--scroll-halo-y);
+      transform: translate3d(calc(-50% + var(--halo-x)), calc(-50% + var(--halo-y)), 0);
+      border: 1px solid rgba(93, 146, 255, 0.42);
+      box-shadow: 0 0 80px rgba(93, 146, 255, 0.24), inset 0 0 50px rgba(93, 146, 255, 0.12);
+      animation: spin 22s linear infinite;
+    }
+
+    .halo--one {
+      width: 78%;
+      aspect-ratio: 1;
+    }
+
+    .halo--two {
+      width: 58%;
+      aspect-ratio: 1;
+      animation-duration: 18s;
+      border-style: dashed;
+    }
+
+    .halo--three {
+      width: 38%;
+      aspect-ratio: 1;
+      animation-duration: 12s;
+    }
+
+    .capsule-float {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: min(310px, 62%);
+      aspect-ratio: 1 / 1.05;
+      transform: translate3d(
+        calc(-50% + var(--move-x) + var(--scroll-shell-x)),
+        calc(-50% + var(--move-y) + var(--scroll-shell-y)),
+        0
+      );
+      animation: float-capsule 8.6s ease-in-out infinite;
+    }
+
+    .capsule-shell {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 36% 36% 42% 42% / 28% 28% 54% 54%;
+      background: linear-gradient(180deg, rgba(139, 185, 255, 0.62), rgba(81, 131, 212, 0.56));
+      border: 1px solid rgba(159, 196, 244, 0.56);
+      box-shadow: 0 24px 55px rgba(63, 106, 181, 0.22), inset 0 14px 24px rgba(255, 255, 255, 0.34);
+    }
+
+    .capsule-shell::before {
+      content: "";
+      position: absolute;
+      inset: 14% 16% 16%;
+      border-radius: 28% 28% 34% 34% / 26% 26% 46% 46%;
+      background: linear-gradient(180deg, rgba(232, 243, 255, 0.88), rgba(206, 226, 248, 0.95));
+      border: 1px solid rgba(130, 179, 238, 0.26);
+    }
+
+    .capsule-top {
+      position: absolute;
+      top: 10%;
+      left: 17%;
+      right: 17%;
+      height: 18%;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(174, 218, 255, 0.95), rgba(96, 150, 247, 0.76));
+      box-shadow: inset 0 5px 8px rgba(255, 255, 255, 0.32), 0 0 35px rgba(89, 150, 255, 0.3);
+    }
+
+    .capsule-screens {
+      position: absolute;
+      left: 22%;
+      right: 22%;
+      bottom: 18%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: end;
+    }
+
+    .capsule-screen {
+      height: 136px;
+      border-radius: 28px;
+      background: linear-gradient(180deg, rgba(238, 248, 255, 0.9), rgba(216, 233, 249, 0.98));
+      border: 1px solid rgba(138, 186, 242, 0.26);
+      box-shadow: inset 0 0 24px rgba(95, 162, 255, 0.14);
+    }
+
+    .capsule-screen--tall {
+      height: 154px;
+    }
+
+    .code-chip {
+      position: absolute;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(121, 171, 234, 0.34);
+      color: #254b77;
+      font-size: 0.84rem;
+      box-shadow: 0 16px 34px rgba(61, 97, 160, 0.18);
+      transform: translate3d(0, 0, 0);
+      animation: float-chip-a 7.6s ease-in-out infinite;
+    }
+
+    .code-chip--1 { top: 16%; left: 10%; }
+    .code-chip--2 {
+      top: 28%;
+      right: 12%;
+      animation-name: float-chip-b;
+      animation-duration: 8.8s;
+    }
+    .code-chip--3 { bottom: 25%; left: 8%; }
+    .code-chip--4 {
+      bottom: 16%;
+      right: 10%;
+      animation-name: float-chip-b;
+    }
+    .code-chip--5 {
+      top: 58%;
+      left: 16%;
+      animation-duration: 9.6s;
+    }
+    .code-chip--6 {
+      top: 44%;
+      right: 18%;
+      animation-name: float-chip-b;
+      animation-duration: 8.2s;
+    }
+
+    .content-section {
+      padding: 72px 0 10px;
+    }
+
+    .section-heading {
+      max-width: 780px;
+      margin-bottom: 26px;
+    }
+
+    .section-heading h2 {
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      line-height: 0.98;
+      margin-top: 16px;
+    }
+
+    .section-heading p {
+      margin: 16px 0 0;
+      font-size: 1.05rem;
+    }
+
+    .card-grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+
+    .info-card,
+    .project-card,
+    .metric-card,
+    .quote-card,
+    .cta-card {
+      border-radius: 26px;
+      transition:
+        transform 560ms var(--reveal-ease),
+        border-color 560ms var(--reveal-ease),
+        box-shadow 560ms var(--reveal-ease);
+    }
+
+    .info-card,
+    .project-card {
+      padding: 24px;
+      grid-column: span 3;
+    }
+
+    .metric-card {
+      grid-column: span 3;
+    }
+
+    .project-topline {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .project-card h3,
+    .info-card h3 {
+      margin-top: 18px;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .tag,
+    .card-meta,
+    .project-outcome {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.76);
+      border: 1px solid rgba(113, 168, 239, 0.24);
+      color: #2a4f7a;
+      font-size: 0.82rem;
+    }
+
+    .quote-card,
+    .cta-card {
+      padding: 34px;
+    }
+
+    .quote-card blockquote {
+      margin: 18px 0 22px;
+      font-family: "Syne", sans-serif;
+      font-size: clamp(1.7rem, 3vw, 2.6rem);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+    }
+
+    .quote-meta {
+      display: grid;
+      gap: 8px;
+    }
+
+    .cta-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -18% -52% auto;
+      width: 380px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(98, 168, 255, 0.18), transparent 65%);
+    }
+
+    .footer-inner {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr auto;
+      gap: 24px;
+      padding: 28px;
+      border-radius: 30px;
+      margin-top: 72px;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-content: flex-start;
+    }
+
+    .footer-links a {
+      color: var(--muted);
+      transition: color 360ms var(--reveal-ease);
+    }
+
+    .footer-links a:hover {
+      color: var(--text);
+    }
+
+    .footer-meta {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 8px;
+      color: var(--muted);
+    }
+
+    .reveal-left,
+    .reveal-right,
+    .reveal-up {
+      opacity: 0;
+      will-change: opacity, transform;
+      transition:
+        opacity var(--reveal-duration) var(--reveal-ease),
+        transform var(--reveal-duration) var(--reveal-ease);
+      transition-delay: var(--reveal-delay, 0s);
+    }
+
+    .reveal-left { transform: translate3d(-60px, 0, 0); }
+    .reveal-right { transform: translate3d(60px, 0, 0); }
+    .reveal-up { transform: translate3d(0, 60px, 0); }
+
+    .reveal-left.is-visible,
+    .reveal-right.is-visible,
+    .reveal-up.is-visible {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+
+    @media (hover: hover) {
+      .info-card:hover,
+      .project-card:hover,
+      .metric-card:hover,
+      .quote-card:hover,
+      .cta-card:hover,
+      .hero-side-card:hover {
+        transform: translate3d(0, -4px, 0);
+        border-color: var(--border-strong);
+        box-shadow: 0 34px 84px rgba(61, 98, 157, 0.2);
+      }
+    }
+
+    @keyframes spin {
+      from {
+        transform: translate3d(calc(-50% + var(--halo-x)), calc(-50% + var(--halo-y)), 0) rotate(0deg);
+      }
+      to {
+        transform: translate3d(calc(-50% + var(--halo-x)), calc(-50% + var(--halo-y)), 0) rotate(360deg);
+      }
+    }
+
+    @keyframes float-capsule {
+      0%, 100% {
+        transform: translate3d(
+          calc(-50% + var(--move-x) + var(--scroll-shell-x)),
+          calc(-50% + var(--move-y) + var(--scroll-shell-y) - 2px),
+          0
+        );
+      }
+      50% {
+        transform: translate3d(
+          calc(-50% + var(--move-x) + var(--scroll-shell-x)),
+          calc(-50% + var(--move-y) + var(--scroll-shell-y) + 6px),
+          0
+        );
+      }
+    }
+
+    @keyframes float-chip-a {
+      0%, 100% { transform: translate3d(0, -2px, 0); }
+      50% { transform: translate3d(0, 5px, 0); }
+    }
+
+    @keyframes float-chip-b {
+      0%, 100% { transform: translate3d(0, 3px, 0); }
+      50% { transform: translate3d(0, -4px, 0); }
+    }
+
+    @media (max-width: 1180px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+      .hero-visual {
+        min-height: 500px;
+      }
+      .info-card,
+      .project-card,
+      .metric-card {
+        grid-column: span 6;
+      }
+      .footer-inner {
+        grid-template-columns: 1fr;
+      }
+      .footer-meta {
+        align-items: flex-start;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .header-inner {
+        flex-wrap: wrap;
+      }
+      .site-nav {
+        order: 3;
+        flex-basis: 100%;
+        justify-content: flex-start;
+      }
+      .hero-stats {
+        grid-template-columns: 1fr;
+      }
+      .info-card,
+      .project-card,
+      .metric-card {
+        grid-column: span 12;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .site-shell {
+        padding-inline: 16px;
+      }
+      .hero {
+        min-height: auto;
+        padding-top: 18px;
+      }
+      .hero h1 {
+        max-width: 100%;
+      }
+      .hero-side-card,
+      .info-card,
+      .project-card,
+      .quote-card,
+      .cta-card,
+      .footer-inner {
+        padding: 20px;
+      }
+      .hero-visual {
+        min-height: 420px;
+      }
+      .capsule-float {
+        width: min(240px, 66%);
+      }
+      .capsule-screen {
+        height: 108px;
+      }
+      .capsule-screen--tall {
+        height: 126px;
+      }
+      .code-chip {
+        font-size: 0.76rem;
+        padding: 8px 11px;
+      }
+      .mini-cta,
+      .button {
+        width: 100%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+      .reveal-left,
+      .reveal-right,
+      .reveal-up {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+      }
+      .halo,
+      .capsule-float,
+      .code-chip {
+        animation: none !important;
+      }
+      .hero-visual {
+        --move-x: 0px;
+        --move-y: 0px;
+        --scroll-shell-x: 0px;
+        --scroll-shell-y: 0px;
+        --scroll-halo-x: 0px;
+        --scroll-halo-y: 0px;
+        --scroll-noise-x: 0px;
+        --scroll-noise-y: 0px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="site-bg" aria-hidden="true"></div>
+  <div class="site-shell">
+    <header class="site-header">
+      <div class="header-inner reveal-up" data-reveal style="--reveal-delay: 0.04s;">
+        <a class="brand" href="#">
+          <span class="brand-mark">AA//</span>
+          <span class="brand-copy">
+            <strong>Ademide</strong>
+            <small>Cinematic Portfolio / Software Engineer</small>
+          </span>
+        </a>
+        <nav class="site-nav" aria-label="Primary navigation">
+          <a class="nav-link is-active" href="#home">Home</a>
+          <a class="nav-link" href="#capabilities">Capabilities</a>
+          <a class="nav-link" href="#work">Work</a>
+          <a class="nav-link" href="#quote">Quote</a>
+          <a class="nav-link" href="#contact">Contact</a>
+        </nav>
+        <a class="mini-cta" href="#contact">Book Build</a>
+      </div>
+    </header>
+
+    <main id="home">
+      <section class="hero">
+        <div class="hero-copy reveal-left" data-reveal style="--reveal-delay: 0.08s;">
+          <div class="hero-topline">
+            <span class="eyebrow">Portfolio / Multilingual Engineer</span>
+            <span class="handle">@ademide.portfolio</span>
+          </div>
+          <h1>Code Without Boundaries</h1>
+          <p>A cinematic portfolio rebuilt as a premium light experience with smooth motion, calm depth, and polished interactions.</p>
+          <div class="hero-actions">
+            <a class="button button--primary reveal-up" data-reveal style="--reveal-delay: 0.28s;" href="#work">View case studies</a>
+            <a class="button button--secondary reveal-up" data-reveal style="--reveal-delay: 0.34s;" href="#contact">Start a project</a>
+          </div>
+          <div class="hero-stats">
+            <article class="stat-card glass-card reveal-up" data-reveal style="--reveal-delay: 0.42s;">
+              <strong>40+</strong>
+              <span>launches delivered</span>
+            </article>
+            <article class="stat-card glass-card reveal-up" data-reveal style="--reveal-delay: 0.50s;">
+              <strong>12</strong>
+              <span>core languages and platforms</span>
+            </article>
+            <article class="stat-card glass-card reveal-up" data-reveal style="--reveal-delay: 0.58s;">
+              <strong>99.9%</strong>
+              <span>uptime-focused systems</span>
+            </article>
+          </div>
+        </div>
+
+        <div class="hero-visual-column">
+          <article class="hero-side-card glass-card reveal-right" data-reveal style="--reveal-delay: 0.16s;">
+            <span class="section-kicker">Current focus</span>
+            <h2>Polyglot product engineering</h2>
+            <p>Front-end experience, backend logic, automation, and launch structure.</p>
+            <ul class="bullet-list">
+              <li>Premium portfolio and brand sites</li>
+              <li>Dashboards and internal tools</li>
+              <li>APIs, scripts, and automation</li>
+              <li>Design systems with motion</li>
+            </ul>
+          </article>
+
+          <div class="hero-visual reveal-right" data-reveal style="--reveal-delay: 0.24s;">
+            <div class="halo halo--one"></div>
+            <div class="halo halo--two"></div>
+            <div class="halo halo--three"></div>
+            <div class="visual-noise"></div>
+            <div class="capsule-float">
+              <div class="capsule-shell">
+                <div class="capsule-top"></div>
+                <div class="capsule-screens">
+                  <div class="capsule-screen"></div>
+                  <div class="capsule-screen capsule-screen--tall"></div>
+                </div>
+              </div>
+            </div>
+            <span class="code-chip code-chip--1">C</span>
+            <span class="code-chip code-chip--2">C++</span>
+            <span class="code-chip code-chip--3">C#</span>
+            <span class="code-chip code-chip--4">Python</span>
+            <span class="code-chip code-chip--5">TypeScript</span>
+            <span class="code-chip code-chip--6">SQL</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="capabilities" class="content-section">
+        <div class="section-heading reveal-left" data-reveal style="--reveal-delay: 0.05s;">
+          <span class="section-kicker">Studio capabilities</span>
+          <h2>Built for founders, brands, and fast-moving teams.</h2>
+          <p>This remake keeps the premium feel while introducing a lighter and cleaner visual base.</p>
+        </div>
+        <div class="card-grid">
+          <article class="info-card glass-card reveal-up" data-reveal style="--reveal-delay: 0.14s;">
+            <span class="card-eyebrow">01</span>
+            <h3>Launch websites</h3>
+            <p>High-trust pages with controlled motion and strong hierarchy.</p>
+            <span class="card-meta">Responsive and polished</span>
+          </article>
+          <article class="info-card glass-card reveal-up" data-reveal style="--reveal-delay: 0.22s;">
+            <span class="card-eyebrow">02</span>
+            <h3>Software engineering</h3>
+            <p>Real depth across C, C++, C#, Python, JS, and TS.</p>
+            <span class="card-meta">Front-end to backend</span>
+          </article>
+          <article class="info-card glass-card reveal-up" data-reveal style="--reveal-delay: 0.30s;">
+            <span class="card-eyebrow">03</span>
+            <h3>Automation workflows</h3>
+            <p>Scripts, jobs, reports, and connective tools.</p>
+            <span class="card-meta">Less manual overhead</span>
+          </article>
+          <article class="info-card glass-card reveal-up" data-reveal style="--reveal-delay: 0.38s;">
+            <span class="card-eyebrow">04</span>
+            <h3>Delivery support</h3>
+            <p>Preview, deploy, refine, and expand after launch.</p>
+            <span class="card-meta">Built to continue</span>
+          </article>
+        </div>
+      </section>
+
+      <section id="work" class="content-section">
+        <div class="section-heading reveal-left" data-reveal style="--reveal-delay: 0.05s;">
+          <span class="section-kicker">Selected work</span>
+          <h2>Projects shaped to look serious and perform well.</h2>
+          <p>The range spans launch sites, dashboards, and automation layers.</p>
+        </div>
+        <div class="card-grid">
+          <article class="project-card glass-card reveal-up" data-reveal style="--reveal-delay: 0.14s;">
+            <div class="project-topline">
+              <span class="project-index">Case</span>
+              <span class="project-outcome">Improved trust and inquiry quality</span>
+            </div>
+            <h3>Nova Systems Studio</h3>
+            <p>A premium brand site with cleaner visual pacing and subtle motion.</p>
+            <div class="tag-row">
+              <span class="tag">TypeScript</span>
+              <span class="tag">Motion</span>
+              <span class="tag">Lead Gen</span>
+            </div>
+          </article>
+          <article class="project-card glass-card reveal-up" data-reveal style="--reveal-delay: 0.22s;">
+            <div class="project-topline">
+              <span class="project-index">Case</span>
+              <span class="project-outcome">Cleaner visibility across teams</span>
+            </div>
+            <h3>Signal Ops Dashboard</h3>
+            <p>A control interface for releases and incidents with strong hierarchy.</p>
+            <div class="tag-row">
+              <span class="tag">C#</span>
+              <span class="tag">.NET</span>
+              <span class="tag">SQL</span>
+            </div>
+          </article>
+          <article class="project-card glass-card reveal-up" data-reveal style="--reveal-delay: 0.30s;">
+            <div class="project-topline">
+              <span class="project-index">Case</span>
+              <span class="project-outcome">Turned manual work into a pipeline</span>
+            </div>
+            <h3>Atlas Automation Layer</h3>
+            <p>A reporting and summarization workflow engine built for clarity.</p>
+            <div class="tag-row">
+              <span class="tag">Python</span>
+              <span class="tag">CLI</span>
+              <span class="tag">APIs</span>
+            </div>
+          </article>
+          <article class="project-card glass-card reveal-up" data-reveal style="--reveal-delay: 0.38s;">
+            <div class="project-topline">
+              <span class="project-index">Case</span>
+              <span class="project-outcome">Made the launch feel like an event</span>
+            </div>
+            <h3>Pulse Microsite</h3>
+            <p>A cinematic landing page with orbit-inspired feature storytelling.</p>
+            <div class="tag-row">
+              <span class="tag">HTML</span>
+              <span class="tag">CSS</span>
+              <span class="tag">JavaScript</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="quote" class="content-section">
+        <article class="quote-card glass-card reveal-up" data-reveal style="--reveal-delay: 0.10s;">
+          <span class="section-kicker">Client perspective</span>
+          <blockquote>"The result felt cinematic, but still engineered and credible."</blockquote>
+          <div class="quote-meta">
+            <strong>Creative direction feedback</strong>
+            <span>That balance is the benchmark for the whole portfolio.</span>
+          </div>
+        </article>
+      </section>
+
+      <section id="contact" class="content-section">
+        <article class="cta-card glass-card reveal-up" data-reveal style="--reveal-delay: 0.10s;">
+          <span class="section-kicker">Next move</span>
+          <h2>If the next launch needs to look serious, we can build it that way.</h2>
+          <p>Portfolio, product, dashboard, automation layer, or a bigger multi-page system.</p>
+          <div class="hero-actions">
+            <a class="button button--primary reveal-up" data-reveal style="--reveal-delay: 0.20s;" href="#">Open contact page</a>
+            <a class="button button--secondary reveal-up" data-reveal style="--reveal-delay: 0.28s;" href="#">Browse the lab</a>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-inner glass-card">
+        <div class="reveal-left" data-reveal style="--reveal-delay: 0.06s;">
+          <span class="section-kicker">Cinematic Portfolio / Software Engineer</span>
+          <h2>Ademide</h2>
+          <p>Premium interfaces, strong engineering, and launch-ready systems.</p>
+        </div>
+        <div class="footer-links reveal-up" data-reveal style="--reveal-delay: 0.14s;">
+          <a href="#home">Home</a>
+          <a href="#capabilities">Capabilities</a>
+          <a href="#work">Work</a>
+          <a href="#contact">Contact</a>
+        </div>
+        <div class="footer-meta reveal-right" data-reveal style="--reveal-delay: 0.22s;">
+          <span>Standalone remake</span>
+          <span id="footer-year"></span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const revealOnScroll = () => {
+      const targets = [...document.querySelectorAll("[data-reveal]")];
+      if (!targets.length) return;
+
+      if (prefersReducedMotion.matches) {
+        targets.forEach((target) => target.classList.add("is-visible"));
+        return;
+      }
+
+      const observer = new IntersectionObserver(
+        (entries, activeObserver) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add("is-visible");
+            activeObserver.unobserve(entry.target);
+          });
+        },
+        {
+          threshold: 0.12,
+          rootMargin: "0px 0px -8% 0px",
+        }
+      );
+
+      targets.forEach((element) => observer.observe(element));
+    };
+
+    const initPointerMotion = () => {
+      const visual = document.querySelector(".hero-visual");
+      if (!visual || prefersReducedMotion.matches) return;
+
+      visual.addEventListener("pointermove", (event) => {
+        const rect = visual.getBoundingClientRect();
+        const offsetX = ((event.clientX - rect.left) / rect.width - 0.5) * 14;
+        const offsetY = ((event.clientY - rect.top) / rect.height - 0.5) * 12;
+        visual.style.setProperty("--move-x", `${offsetX}px`);
+        visual.style.setProperty("--move-y", `${offsetY}px`);
+      });
+
+      visual.addEventListener("pointerleave", () => {
+        visual.style.setProperty("--move-x", "0px");
+        visual.style.setProperty("--move-y", "0px");
+      });
+    };
+
+    const initHeroParallax = () => {
+      const visual = document.querySelector(".hero-visual");
+      if (!visual || prefersReducedMotion.matches) return;
+
+      let frame = 0;
+
+      const update = () => {
+        frame = 0;
+        const rect = visual.getBoundingClientRect();
+        const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+        const distanceFromCenter = rect.top + rect.height / 2 - viewportHeight / 2;
+        const ratio = Math.max(-1, Math.min(1, distanceFromCenter / viewportHeight));
+
+        visual.style.setProperty("--scroll-shell-x", `${ratio * -4}px`);
+        visual.style.setProperty("--scroll-shell-y", `${ratio * -14}px`);
+        visual.style.setProperty("--scroll-halo-x", `${ratio * 3}px`);
+        visual.style.setProperty("--scroll-halo-y", `${ratio * -9}px`);
+        visual.style.setProperty("--scroll-noise-x", `${ratio * -2}px`);
+        visual.style.setProperty("--scroll-noise-y", `${ratio * -5}px`);
+      };
+
+      const requestTick = () => {
+        if (frame) return;
+        frame = window.requestAnimationFrame(update);
+      };
+
+      window.addEventListener("scroll", requestTick, { passive: true });
+      window.addEventListener("resize", requestTick);
+      requestTick();
+    };
+
+    document.getElementById("footer-year").textContent = new Date().getFullYear();
+    revealOnScroll();
+    initPointerMotion();
+    initHeroParallax();
+  </script>
+</body>
+</html>
